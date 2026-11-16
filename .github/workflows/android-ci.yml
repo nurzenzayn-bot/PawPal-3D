@@ -35,6 +35,7 @@ jobs:
           yes | sdkmanager --licenses >/dev/null 2>&1 || true
           sdkmanager "platform-tools" "build-tools;36.0.0" "platforms;android-36-ext1"
 
+
       - name: Ensure .env exists for Secrets Gradle Plugin
         run: |
           if [ ! -f .env ] && [ ! -f .env.example ]; then
