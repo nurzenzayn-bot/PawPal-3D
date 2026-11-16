@@ -27,16 +27,16 @@ jobs:
           distribution: temurin
           java-version: 17
 
-      - name: Ensure sdkmanager is on PATH
+      - name: Install latest cmdline-tools + SDK Platform 36 (Extension Level 1)
         run: |
-          if [ -d "$ANDROID_HOME/cmdline-tools/latest/bin" ]; then
-            echo "$ANDROID_HOME/cmdline-tools/latest/bin" >> "$GITHUB_PATH"
-          fi
-          echo "ANDROID_HOME=$ANDROID_HOME"
-          which sdkmanager || ls "$ANDROID_HOME/cmdline-tools"
-
-      - name: Install Android SDK Platform 36 (Extension Level 1)
-        run: |
+          curl -fsSL "https://dl.google.com/android/repository/commandlinetools-linux-16111833_latest.zip" -o /tmp/cmdline-tools.zip
+          rm -rf "$ANDROID_HOME/cmdline-tools/latest"
+          mkdir -p "$ANDROID_HOME/cmdline-tools/latest"
+          unzip -q /tmp/cmdline-tools.zip -d /tmp/cmdline-tools-extract
+          mv /tmp/cmdline-tools-extract/cmdline-tools/* "$ANDROID_HOME/cmdline-tools/latest/"
+          echo "$ANDROID_HOME/cmdline-tools/latest/bin" >> "$GITHUB_PATH"
+          export PATH="$ANDROID_HOME/cmdline-tools/latest/bin:$PATH"
+          sdkmanager --version
           yes | sdkmanager --licenses >/dev/null 2>&1 || true
           sdkmanager "platform-tools" "platforms;android-36-ext1"
           sdkmanager "build-tools;36.0.0" || echo "build-tools;36.0.0 not available; AGP will auto-download its preferred version"
