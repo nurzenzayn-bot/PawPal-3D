@@ -27,14 +27,19 @@ jobs:
           distribution: temurin
           java-version: 17
 
-      - name: Set up Android command-line tools
-        uses: android-actions/setup-android@v3
+      - name: Ensure sdkmanager is on PATH
+        run: |
+          if [ -d "$ANDROID_HOME/cmdline-tools/latest/bin" ]; then
+            echo "$ANDROID_HOME/cmdline-tools/latest/bin" >> "$GITHUB_PATH"
+          fi
+          echo "ANDROID_HOME=$ANDROID_HOME"
+          which sdkmanager || ls "$ANDROID_HOME/cmdline-tools"
 
       - name: Install Android SDK Platform 36 (Extension Level 1)
         run: |
           yes | sdkmanager --licenses >/dev/null 2>&1 || true
-          sdkmanager "platform-tools" "build-tools;36.0.0" "platforms;android-36-ext1"
-
+          sdkmanager "platform-tools" "platforms;android-36-ext1"
+          sdkmanager "build-tools;36.0.0" || echo "build-tools;36.0.0 not available; AGP will auto-download its preferred version"
 
       - name: Ensure .env exists for Secrets Gradle Plugin
         run: |
