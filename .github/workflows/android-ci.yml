@@ -41,11 +41,17 @@ jobs:
           sdkmanager "platform-tools" "platforms;android-36-ext1"
           sdkmanager "build-tools;36.0.0" || echo "build-tools;36.0.0 not available; AGP will auto-download its preferred version"
 
-      - name: Ensure .env exists for Secrets Gradle Plugin
+      - name: Generate .env with all referenced keys
         run: |
-          if [ ! -f .env ] && [ ! -f .env.example ]; then
-            printf 'FIREBASE_APPCHECK_DEBUG_TOKEN=placeholder\n' > .env
-          fi
+          [ -f .env ] || printf 'FIREBASE_APPCHECK_DEBUG_TOKEN=placeholder\n' > .env
+          grep -rhoE 'BuildConfig\.[A-Za-z0-9_]+' app/src --include='*.kt' --include='*.java' 2>/dev/null \
+            | sed 's/.*BuildConfig\.//' | sort -u > /tmp/buildconfig-keys.txt
+          grep -rhoE '\$\{[A-Za-z0-9_]+\}' app/src/main/AndroidManifest.xml 2>/dev/null \
+            | sed 's/${//;s/}//' | sort -u >> /tmp/buildconfig-keys.txt
+          sort -u /tmp/buildconfig-keys.txt | while read -r key; do
+            [ -n "$key" ] && grep -q "^${key}=" .env || echo "${key}=placeholder" >> .env
+          done
+          echo "=== generated .env ==="; cat .env
 
       - name: Make gradlew executable
         run: chmod +x ./gradlew
