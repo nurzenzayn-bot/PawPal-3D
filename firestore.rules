@@ -1,0 +1,187 @@
+rules_version = '2';
+
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    // Global safety net: default deny
+    match /{document=**} {
+      allow read, write: if false;
+    }
+
+    function isSignedIn() {
+      return request.auth != null;
+    }
+
+    function isOwner(userId) {
+      return isSignedIn() && request.auth.uid == userId;
+    }
+
+    function isValidId(id) {
+      return id is string && id.size() >= 1 && id.size() <= 128 && id.matches('^[a-zA-Z0-9_\\-]+$');
+    }
+
+    function incoming() {
+      return request.resource.data;
+    }
+
+    function existing() {
+      return resource.data;
+    }
+
+    function isValidBoundedStringList(arr, maxLen) {
+      return arr is list && arr.size() <= maxLen && (arr.size() == 0 || arr[0] is string);
+    }
+
+    function isValidUserProfile(data) {
+      return data.userId is string && data.userId == request.auth.uid &&
+             (!('nickname' in data) || (data.nickname is string && data.nickname.size() <= 60)) &&
+             data.playerLevel is int && data.playerLevel >= 1 && data.playerLevel <= 999 &&
+             (!('levelProgress' in data) || ((data.levelProgress is float || data.levelProgress is int) && data.levelProgress >= 0 && data.levelProgress <= 1)) &&
+             data.coins is int && data.coins >= 0 && data.coins <= 10000000 &&
+             data.diamonds is int && data.diamonds >= 0 && data.diamonds <= 10000000 &&
+             isValidBoundedStringList(data.unlockedCostumes, 50) &&
+             isValidBoundedStringList(data.unlockedAccessories, 50) &&
+             isValidBoundedStringList(data.unlockedThemes, 50) &&
+             (!('waterGlassesToday' in data) || (data.waterGlassesToday is int && data.waterGlassesToday >= 0 && data.waterGlassesToday <= 100)) &&
+             (!('stretchCountToday' in data) || (data.stretchCountToday is int && data.stretchCountToday <= 100 && data.stretchCountToday >= 0)) &&
+             data.createdAt is timestamp && data.createdAt <= request.time &&
+             data.updatedAt is timestamp && data.updatedAt <= request.time;
+    }
+
+    function isValidMemoryFact(data) {
+      return data.userId is string && data.userId == request.auth.uid &&
+             data.category is string && data.category.size() >= 1 && data.category.size() <= 60 &&
+             data.content is string && data.content.size() >= 1 && data.content.size() <= 500 &&
+             data.createdAt is timestamp && data.createdAt <= request.time &&
+             data.updatedAt is timestamp && data.updatedAt <= request.time;
+    }
+
+    function isValidMoodEntry(data) {
+      return data.userId is string && data.userId == request.auth.uid &&
+             data.moodType is string && data.moodType.size() >= 1 && data.moodType.size() <= 40 &&
+             data.note is string && data.note.size() <= 1500 &&
+             data.aiReply is string && data.aiReply.size() >= 1 && data.aiReply.size() <= 2000 &&
+             data.characterId is string && data.characterId.size() >= 1 && data.characterId.size() <= 40 &&
+             data.createdAt is timestamp && data.createdAt <= request.time &&
+             data.updatedAt is timestamp && data.updatedAt <= request.time;
+    }
+
+    function isValidStorySession(data) {
+      return data.userId is string && data.userId == request.auth.uid &&
+             data.themeId is string && data.themeId.size() >= 1 && data.themeId.size() <= 60 &&
+             data.characterId is string && data.characterId.size() >= 1 && data.characterId.size() <= 40 &&
+             data.currentNarrative is string && data.currentNarrative.size() >= 1 && data.currentNarrative.size() <= 5000 &&
+             isValidBoundedStringList(data.inventoryLabels, 30) &&
+             isValidBoundedStringList(data.historyLog, 80) &&
+             data.createdAt is timestamp && data.createdAt <= request.time &&
+             data.updatedAt is timestamp && data.updatedAt <= request.time;
+    }
+
+    // 1. User Sync Profile & Economy
+    match /users/{userId}/sync/{profileDocId} {
+      allow list: if isOwner(userId);
+      allow get: if isOwner(userId) && isValidId(profileDocId);
+
+      allow create: if isOwner(userId) &&
+                       isValidId(profileDocId) &&
+                       incoming().keys().hasAll([
+                         'userId', 'playerLevel', 'coins', 'diamonds',
+                         'unlockedCostumes', 'unlockedAccessories', 'unlockedThemes',
+                         'createdAt', 'updatedAt'
+                       ]) &&
+                       incoming().keys().hasOnly([
+                         'userId', 'nickname', 'playerLevel', 'levelProgress',
+                         'coins', 'diamonds', 'unlockedCostumes', 'unlockedAccessories',
+                         'unlockedThemes', 'waterGlassesToday', 'stretchCountToday',
+                         'createdAt', 'updatedAt'
+                       ]) &&
+                       isValidUserProfile(incoming());
+
+      allow update: if isOwner(userId) &&
+                       isValidId(profileDocId) &&
+                       incoming().userId == existing().userId &&
+                       incoming().createdAt == existing().createdAt &&
+                       isValidUserProfile(incoming()) &&
+                       incoming().diff(existing()).affectedKeys().hasOnly([
+                         'nickname', 'playerLevel', 'levelProgress',
+                         'coins', 'diamonds', 'unlockedCostumes', 'unlockedAccessories',
+                         'unlockedThemes', 'waterGlassesToday', 'stretchCountToday',
+                         'updatedAt'
+                       ]);
+
+      allow delete: if isOwner(userId) && isValidId(profileDocId);
+    }
+
+    // 2. Long-Term Character Memories
+    match /users/{userId}/memories/{memoryId} {
+      allow list: if isOwner(userId);
+      allow get: if isOwner(userId) && isValidId(memoryId);
+
+      allow create: if isOwner(userId) &&
+                       isValidId(memoryId) &&
+                       incoming().keys().hasAll(['userId', 'category', 'content', 'createdAt', 'updatedAt']) &&
+                       incoming().keys().hasOnly(['userId', 'category', 'content', 'createdAt', 'updatedAt']) &&
+                       isValidMemoryFact(incoming());
+
+      allow update: if isOwner(userId) &&
+                       isValidId(memoryId) &&
+                       incoming().userId == existing().userId &&
+                       incoming().createdAt == existing().createdAt &&
+                       isValidMemoryFact(incoming()) &&
+                       incoming().diff(existing()).affectedKeys().hasOnly(['category', 'content', 'updatedAt']);
+
+      allow delete: if isOwner(userId) && isValidId(memoryId);
+    }
+
+    // 3. Mood Journal Entries
+    match /users/{userId}/mood_entries/{entryId} {
+      allow list: if isOwner(userId);
+      allow get: if isOwner(userId) && isValidId(entryId);
+
+      allow create: if isOwner(userId) &&
+                       isValidId(entryId) &&
+                       incoming().keys().hasAll(['userId', 'moodType', 'note', 'aiReply', 'characterId', 'createdAt', 'updatedAt']) &&
+                       incoming().keys().hasOnly(['userId', 'moodType', 'note', 'aiReply', 'characterId', 'createdAt', 'updatedAt']) &&
+                       isValidMoodEntry(incoming());
+
+      allow update: if isOwner(userId) &&
+                       isValidId(entryId) &&
+                       incoming().userId == existing().userId &&
+                       incoming().createdAt == existing().createdAt &&
+                       isValidMoodEntry(incoming()) &&
+                       incoming().diff(existing()).affectedKeys().hasOnly(['moodType', 'note', 'aiReply', 'characterId', 'updatedAt']);
+
+      allow delete: if isOwner(userId) && isValidId(entryId);
+    }
+
+    // 4. Saved Story Adventure Sessions
+    match /users/{userId}/story_sessions/{sessionId} {
+      allow list: if isOwner(userId);
+      allow get: if isOwner(userId) && isValidId(sessionId);
+
+      allow create: if isOwner(userId) &&
+                       isValidId(sessionId) &&
+                       incoming().keys().hasAll([
+                         'userId', 'themeId', 'characterId', 'currentNarrative',
+                         'inventoryLabels', 'historyLog', 'createdAt', 'updatedAt'
+                       ]) &&
+                       incoming().keys().hasOnly([
+                         'userId', 'themeId', 'characterId', 'currentNarrative',
+                         'inventoryLabels', 'historyLog', 'createdAt', 'updatedAt'
+                       ]) &&
+                       isValidStorySession(incoming());
+
+      allow update: if isOwner(userId) &&
+                       isValidId(sessionId) &&
+                       incoming().userId == existing().userId &&
+                       incoming().createdAt == existing().createdAt &&
+                       isValidStorySession(incoming()) &&
+                       incoming().diff(existing()).affectedKeys().hasOnly([
+                         'themeId', 'characterId', 'currentNarrative',
+                         'inventoryLabels', 'historyLog', 'updatedAt'
+                       ]);
+
+      allow delete: if isOwner(userId) && isValidId(sessionId);
+    }
+  }
+}

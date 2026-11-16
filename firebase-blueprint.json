@@ -1,0 +1,213 @@
+{
+  "entities": {
+    "CloudUserProfile": {
+      "title": "CloudUserProfile",
+      "description": "Synchronized user profile, economy balance, unlocked shop items, and daily habit counters.",
+      "type": "object",
+      "properties": {
+        "userId": {
+          "type": "string",
+          "description": "Authenticated Firebase UID owning this profile."
+        },
+        "nickname": {
+          "type": "string",
+          "description": "User's preferred nickname addressed by characters."
+        },
+        "playerLevel": {
+          "type": "integer",
+          "description": "Current player companion level."
+        },
+        "levelProgress": {
+          "type": "number",
+          "description": "Progress fraction toward next level (0.0 to 1.0)."
+        },
+        "coins": {
+          "type": "integer",
+          "description": "Current coin balance earned from activities."
+        },
+        "diamonds": {
+          "type": "integer",
+          "description": "Current diamond balance for premium items."
+        },
+        "unlockedCostumes": {
+          "type": "array",
+          "description": "List of unlocked outfit IDs."
+        },
+        "unlockedAccessories": {
+          "type": "array",
+          "description": "List of unlocked accessory IDs."
+        },
+        "unlockedThemes": {
+          "type": "array",
+          "description": "List of unlocked room background theme names."
+        },
+        "waterGlassesToday": {
+          "type": "integer",
+          "description": "Daily hydration count."
+        },
+        "stretchCountToday": {
+          "type": "integer",
+          "description": "Daily stretch count."
+        },
+        "createdAt": {
+          "type": "string",
+          "format": "date-time",
+          "description": "Server timestamp set via FieldValue.serverTimestamp()."
+        },
+        "updatedAt": {
+          "type": "string",
+          "format": "date-time",
+          "description": "Server timestamp updated via FieldValue.serverTimestamp()."
+        }
+      },
+      "required": [
+        "userId",
+        "playerLevel",
+        "coins",
+        "diamonds",
+        "unlockedCostumes",
+        "unlockedAccessories",
+        "unlockedThemes",
+        "createdAt",
+        "updatedAt"
+      ]
+    },
+    "CloudMemoryFact": {
+      "title": "CloudMemoryFact",
+      "description": "Long-term personal memory remembered by the AI companion.",
+      "type": "object",
+      "properties": {
+        "userId": {
+          "type": "string",
+          "description": "Owner Firebase UID."
+        },
+        "category": {
+          "type": "string",
+          "description": "Fact category such as Hobi, Sekolah, Impian, or Kebiasaan."
+        },
+        "content": {
+          "type": "string",
+          "description": "Memory text remembered by the companion."
+        },
+        "createdAt": {
+          "type": "string",
+          "format": "date-time",
+          "description": "Server timestamp set via FieldValue.serverTimestamp()."
+        },
+        "updatedAt": {
+          "type": "string",
+          "format": "date-time",
+          "description": "Server timestamp updated via FieldValue.serverTimestamp()."
+        }
+      },
+      "required": ["userId", "category", "content", "createdAt", "updatedAt"]
+    },
+    "CloudMoodEntry": {
+      "title": "CloudMoodEntry",
+      "description": "Mood journal record with AI empathetic reply.",
+      "type": "object",
+      "properties": {
+        "userId": {
+          "type": "string",
+          "description": "Owner Firebase UID."
+        },
+        "moodType": {
+          "type": "string",
+          "description": "MoodType enum name."
+        },
+        "note": {
+          "type": "string",
+          "description": "User's mood journal note."
+        },
+        "aiReply": {
+          "type": "string",
+          "description": "AI character's personalized response."
+        },
+        "characterId": {
+          "type": "string",
+          "description": "Character ID that replied."
+        },
+        "createdAt": {
+          "type": "string",
+          "format": "date-time",
+          "description": "Server timestamp set via FieldValue.serverTimestamp()."
+        },
+        "updatedAt": {
+          "type": "string",
+          "format": "date-time",
+          "description": "Server timestamp updated via FieldValue.serverTimestamp()."
+        }
+      },
+      "required": ["userId", "moodType", "note", "aiReply", "characterId", "createdAt", "updatedAt"]
+    },
+    "CloudStorySession": {
+      "title": "CloudStorySession",
+      "description": "Saved interactive story adventure progress.",
+      "type": "object",
+      "properties": {
+        "userId": {
+          "type": "string",
+          "description": "Owner Firebase UID."
+        },
+        "themeId": {
+          "type": "string",
+          "description": "StoryTheme enum name."
+        },
+        "characterId": {
+          "type": "string",
+          "description": "Companion character ID."
+        },
+        "currentNarrative": {
+          "type": "string",
+          "description": "Latest story narrative segment."
+        },
+        "inventoryLabels": {
+          "type": "array",
+          "description": "Collected story item names."
+        },
+        "historyLog": {
+          "type": "array",
+          "description": "Recent adventure turn summaries."
+        },
+        "createdAt": {
+          "type": "string",
+          "format": "date-time",
+          "description": "Server timestamp set via FieldValue.serverTimestamp()."
+        },
+        "updatedAt": {
+          "type": "string",
+          "format": "date-time",
+          "description": "Server timestamp updated via FieldValue.serverTimestamp()."
+        }
+      },
+      "required": [
+        "userId",
+        "themeId",
+        "characterId",
+        "currentNarrative",
+        "inventoryLabels",
+        "historyLog",
+        "createdAt",
+        "updatedAt"
+      ]
+    }
+  },
+  "firestore": {
+    "/users/{userId}/sync/{profileDocId}": {
+      "schema": "CloudUserProfile",
+      "description": "Per-user synchronized profile, economy balances, and unlocked shop items."
+    },
+    "/users/{userId}/memories/{memoryId}": {
+      "schema": "CloudMemoryFact",
+      "description": "Per-user long-term companion memory facts."
+    },
+    "/users/{userId}/mood_entries/{entryId}": {
+      "schema": "CloudMoodEntry",
+      "description": "Per-user mood journal entries and character replies."
+    },
+    "/users/{userId}/story_sessions/{sessionId}": {
+      "schema": "CloudStorySession",
+      "description": "Per-user saved interactive story adventure sessions."
+    }
+  }
+}
