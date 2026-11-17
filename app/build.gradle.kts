@@ -79,6 +79,13 @@ secrets {
   propertiesFileName = ".env"
   defaultPropertiesFileName = ".env.example"
   ignoreList.add("FIREBASE_APPCHECK_DEBUG_TOKEN")
+  // Never let .env override AGP's auto-generated BuildConfig fields (DEBUG is Boolean, etc.)
+  ignoreList.add("DEBUG")
+  ignoreList.add("APPLICATION_ID")
+  ignoreList.add("BUILD_TYPE")
+  ignoreList.add("FLAVOR")
+  ignoreList.add("VERSION_CODE")
+  ignoreList.add("VERSION_NAME")
 }
 
 googleServices { missingGoogleServicesStrategy = MissingGoogleServicesStrategy.WARN }

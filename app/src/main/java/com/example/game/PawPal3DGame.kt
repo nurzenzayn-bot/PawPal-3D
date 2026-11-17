@@ -193,7 +193,7 @@ private class PawPal3DScreen(
         val model = cachedModel(key) {
             modelBuilder.createBox(
                 1f, 1f, 1f, material(color),
-                VertexAttributes.Usage.Position or VertexAttributes.Usage.Normal
+                (VertexAttributes.Usage.Position or VertexAttributes.Usage.Normal).toLong()
             )
         }
         val instance = ModelInstance(model)
@@ -211,7 +211,7 @@ private class PawPal3DScreen(
         val model = cachedModel(key) {
             modelBuilder.createSphere(
                 1f, 1f, 1f, 24, 20, material(color),
-                VertexAttributes.Usage.Position or VertexAttributes.Usage.Normal
+                (VertexAttributes.Usage.Position or VertexAttributes.Usage.Normal).toLong()
             )
         }
         petParts += PetPart(ModelInstance(model), Vector3(position), Vector3(scale), motion)
@@ -227,7 +227,7 @@ private class PawPal3DScreen(
         val model = cachedModel(key) {
             modelBuilder.createCone(
                 1f, 1f, 1f, 20, material(color),
-                VertexAttributes.Usage.Position or VertexAttributes.Usage.Normal
+                (VertexAttributes.Usage.Position or VertexAttributes.Usage.Normal).toLong()
             )
         }
         petParts += PetPart(ModelInstance(model), Vector3(position), Vector3(scale), motion)
@@ -238,7 +238,7 @@ private class PawPal3DScreen(
         val model = cachedModel(key) {
             modelBuilder.createCylinder(
                 0.34f, 1f, 0.34f, 16, material(color),
-                VertexAttributes.Usage.Position or VertexAttributes.Usage.Normal
+                (VertexAttributes.Usage.Position or VertexAttributes.Usage.Normal).toLong()
             )
         }
         petParts += PetPart(

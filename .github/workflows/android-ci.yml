@@ -46,7 +46,7 @@ jobs:
           [ -f .env ] || printf 'FIREBASE_APPCHECK_DEBUG_TOKEN=placeholder\n' > .env
           [ -f .env.example ] || cp .env .env.example
           grep -rhoE 'BuildConfig\.[A-Za-z0-9_]+' app/src --include='*.kt' --include='*.java' 2>/dev/null \
-            | sed 's/.*BuildConfig\.//' | sort -u > /tmp/keys.txt
+            | sed 's/.*BuildConfig\.//' | grep -vE '^(DEBUG|APPLICATION_ID|BUILD_TYPE|FLAVOR|VERSION_CODE|VERSION_NAME)$' | sort -u > /tmp/keys.txt
           grep -rhoE '\$\{[A-Za-z0-9_]+\}' app/src --include='*.xml' 2>/dev/null \
             | sed 's/${//;s/}//' | sort -u >> /tmp/keys.txt
           sort -u /tmp/keys.txt | while read -r key; do
