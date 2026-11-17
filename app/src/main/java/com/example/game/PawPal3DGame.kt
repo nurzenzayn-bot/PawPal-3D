@@ -572,7 +572,7 @@ private class PawPal3DScreen(
         }
 
         val sky = updateDayNightLighting()
-        ScreenUtils.clear(sky.r, sky.g, sky.b, 1f)
+        ScreenUtils.clear(sky.r, sky.g, sky.b, 1f, true)
         Gdx.gl.glViewport(0, 0, Gdx.graphics.width, Gdx.graphics.height)
         Gdx.gl.glEnable(GL20.GL_DEPTH_TEST)
         updateCamera()
