@@ -325,9 +325,9 @@ private class PawPal3DScreen(
 
         // Eyes, muzzle, nose, and simple smiling mouth.
         for (side in listOf(-1f, 1f)) {
-            addSphere(white, Vector3(side * 0.25f, 1.92f, 0.72f), Vector3(0.17f, 0.20f, 0.08f), PartMotion.EYE)
-            addSphere(dark, Vector3(side * 0.25f, 1.91f, 0.80f), Vector3(0.075f, 0.095f, 0.04f), PartMotion.EYE)
-            addSphere(white, Vector3(side * 0.27f, 1.96f, 0.84f), Vector3(0.028f, 0.032f, 0.018f), PartMotion.EYE)
+            addSphere(white, Vector3(side * 0.24f, 1.90f, 0.72f), Vector3(0.13f, 0.15f, 0.06f), PartMotion.EYE)
+            addSphere(dark, Vector3(side * 0.24f, 1.89f, 0.79f), Vector3(0.055f, 0.07f, 0.03f), PartMotion.EYE)
+            addSphere(white, Vector3(side * 0.26f, 1.93f, 0.82f), Vector3(0.022f, 0.026f, 0.014f), PartMotion.EYE)
             addSphere(fur, Vector3(side * 0.19f, 1.57f, 0.70f), Vector3(0.25f, 0.19f, 0.20f), PartMotion.HEAD)
         }
         addSphere(Color(0.15f, 0.10f, 0.13f, 1f), Vector3(0f, 1.66f, 0.88f), Vector3(0.13f, 0.10f, 0.07f), PartMotion.HEAD)
@@ -589,56 +589,66 @@ private class PawPal3DScreen(
         uiViewport.apply()
         spriteBatch.projectionMatrix = uiCamera.combined
         spriteBatch.begin()
-        drawPanel(16f, 724f, 448f, 62f, Color(0.98f, 0.96f, 0.92f, 0.93f))
-        font.color = Color.valueOf("26364A")
-        font.draw(spriteBatch, "PAWPAL 3D", 150f, 766f)
-        smallFont.color = Color.valueOf("576B7D")
-        smallFont.draw(spriteBatch, "• ${dayPeriodLabel()}", 365f, 766f)
-        smallFont.draw(spriteBatch, "< Kembali", 30f, 752f)
-        smallFont.draw(spriteBatch, "${session.petName}  •  Lv.${session.level}  •  ${session.coins} koin", 151f, 741f)
-        drawPanel(151f, 729f, 250f, 5f, Color.valueOf("DDE3E8"))
-        drawPanel(151f, 729f, 250f * session.levelProgress, 5f, Color.valueOf("F2B84B"))
-        smallFont.color = Color.valueOf("64748B")
-        smallFont.draw(spriteBatch, "${session.xp % 100}/100 XP", 407f, 735f)
-        drawPanel(20f, 590f, 440f, 118f, Color(0.98f, 0.97f, 0.94f, 0.89f))
-        drawStat("Lapar", session.hunger, 681f, Color.valueOf("F2B544"))
-        drawStat("Senang", session.happiness, 654f, Color.valueOf("EF8DA9"))
-        drawStat("Energi", session.energy, 627f, Color.valueOf("77B9E8"))
-        drawStat("Bersih", session.cleanliness, 600f, Color.valueOf("6AC3A7"))
-
-        drawPanel(42f, 218f, 396f, 42f, Color(0.98f, 0.97f, 0.94f, 0.90f))
-        smallFont.color = Color.valueOf("36485B")
-        centerText(smallFont, if (noticeTime > 0f) notice else "Geser layar untuk memutar kamera", 243f)
 
         if (miniGame) {
             drawPanel(16f, 724f, 448f, 62f, Color(0.99f, 0.94f, 0.94f, 0.96f))
             font.color = Color.valueOf("9B355D")
             centerText(font, "TANGKAP BINTANG", 766f)
             smallFont.color = Color.valueOf("6C5260")
-            centerText(smallFont, "Skor $miniGameScore    Waktu ${max(0, miniGameTime.toInt())} dtk", 739f)
+            centerText(smallFont, "Skor $miniGameScore   -   Waktu ${max(0, miniGameTime.toInt())} dtk", 739f)
             font.color = Color.valueOf("F5AE35")
             centerText(font, "*", starY + 15f, starX)
-            drawButton(92f, 45f, 296f, 82f, "KEMBALI KE RUANGAN", Color.valueOf("FCE0E7"))
+            drawButton(92f, 45f, 296f, 82f, "KEMBALI", Color.valueOf("FCE0E7"))
         } else {
-            drawButton(92f, 158f, 296f, 52f, "MAIN TANGKAP BINTANG", Color.valueOf("FFE7AC"))
-            drawButton(10f, 42f, 106f, 88f, "MAKAN", Color.valueOf("FFE1B8"))
-            drawButton(126f, 42f, 106f, 88f, "MAIN", Color.valueOf("E5DFFD"))
-            drawButton(242f, 42f, 106f, 88f, "MANDI", Color.valueOf("D6F1EB"))
-            drawButton(358f, 42f, 112f, 88f, "TIDUR", Color.valueOf("D9E8F8"))
-            drawPanel(42f, 271f, 396f, 27f, Color(0.98f, 0.96f, 0.90f, 0.88f))
+            // ---- Top header bar ----
+            drawPanel(14f, 730f, 452f, 56f, Color(0.98f, 0.96f, 0.92f, 0.94f))
+            font.color = Color.valueOf("26364A")
+            centerText(font, "PAWPAL 3D", 768f)
+            smallFont.color = Color.valueOf("576B7D")
+            smallFont.draw(spriteBatch, "< Kembali", 26f, 750f)
+            rightText(smallFont, "- ${dayPeriodLabel()}", 452f - 22f, 750f)
+            smallFont.color = Color.valueOf("475569")
+            smallFont.draw(spriteBatch, "${session.petName}  -  Lv.${session.level}  -  ${session.coins} koin", 26f, 740f)
+            drawPanel(170f, 736f, 200f, 5f, Color.valueOf("DDE3E8"))
+            drawPanel(170f, 736f, 200f * session.levelProgress, 5f, Color.valueOf("F2B84B"))
+            rightText(smallFont, "${session.xp % 100}/100 XP", 452f - 22f, 740f)
+
+            // ---- Stats strip (4 columns, compact, pet fully visible below) ----
+            drawPanel(14f, 668f, 452f, 54f, Color(0.98f, 0.97f, 0.94f, 0.92f))
+            drawStat("Lapar", session.hunger, 28f, Color.valueOf("F2B544"))
+            drawStat("Senang", session.happiness, 138f, Color.valueOf("EF8DA9"))
+            drawStat("Energi", session.energy, 248f, Color.valueOf("77B9E8"))
+            drawStat("Bersih", session.cleanliness, 358f, Color.valueOf("6AC3A7"))
+
+            // ---- Speech bubble + mission ----
+            drawPanel(40f, 236f, 400f, 40f, Color(1f, 1f, 1f, 0.95f))
+            font.color = Color.valueOf("334155")
+            centerText(font, if (noticeTime > 0f) notice else "Geser layar untuk memutar kamera", 262f)
+            drawPanel(40f, 196f, 400f, 28f, Color(0.99f, 0.95f, 0.86f, 0.93f))
             smallFont.color = Color.valueOf("775A2C")
-            centerText(smallFont, if (session.dailyQuestClaimed) "Misi harian selesai • Hadiah sudah diklaim!" else "Misi harian: Rawat hewan 3x • ${session.dailyCareCount}/3 • Hadiah 25 koin", 288f)
+            centerText(smallFont, if (session.dailyQuestClaimed) "Misi selesai - Hadiah diklaim!" else "Misi: Rawat hewan 3x - ${session.dailyCareCount}/3 - Hadiah 25 koin", 215f)
+
+            // ---- Buttons ----
+            drawButton(80f, 148f, 320f, 40f, "MAIN TANGKAP BINTANG", Color.valueOf("FFE7AC"))
+            drawButton(14f, 40f, 104f, 88f, "MAKAN", Color.valueOf("FFE1B8"))
+            drawButton(130f, 40f, 104f, 88f, "MAIN", Color.valueOf("E5DFFD"))
+            drawButton(246f, 40f, 104f, 88f, "MANDI", Color.valueOf("D6F1EB"))
+            drawButton(362f, 40f, 104f, 88f, "TIDUR", Color.valueOf("D9E8F8"))
         }
         spriteBatch.end()
     }
 
-    private fun drawStat(label: String, value: Float, y: Float, color: Color) {
+    private fun rightText(textFont: BitmapFont, text: String, rightX: Float, y: Float) {
+        layout.setText(textFont, text)
+        textFont.draw(spriteBatch, layout, rightX - layout.width, y)
+    }
+
+    private fun drawStat(label: String, value: Float, x: Float, color: Color) {
         smallFont.color = Color.valueOf("3B4A5B")
-        smallFont.draw(spriteBatch, label, 36f, y + 12f)
-        drawPanel(124f, y, 278f, 10f, Color.valueOf("DFE5E8"))
-        drawPanel(124f, y, 278f * (value / 100f), 10f, color)
-        smallFont.color = Color.valueOf("3B4A5B")
-        smallFont.draw(spriteBatch, "${value.toInt()}%", 410f, y + 12f)
+        smallFont.draw(spriteBatch, label, x, 710f)
+        drawPanel(x, 688f, 88f, 8f, Color.valueOf("DFE5E8"))
+        drawPanel(x, 688f, 88f * (value / 100f).coerceIn(0f, 1f), 8f, color)
+        smallFont.draw(spriteBatch, "${value.toInt()}%", x, 680f)
     }
 
     private fun drawButton(x: Float, y: Float, w: Float, h: Float, label: String, color: Color) {
