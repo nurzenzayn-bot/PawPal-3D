@@ -42,9 +42,12 @@ jobs:
           sdkmanager "build-tools;36.0.0" || echo "build-tools;36.0.0 not available; AGP will auto-download its preferred version"
 
       - name: Generate .env with all referenced keys
+        env:
+          GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
         run: |
           [ -f .env ] || printf 'FIREBASE_APPCHECK_DEBUG_TOKEN=placeholder\n' > .env
           [ -f .env.example ] || cp .env .env.example
+          [ -n "${GEMINI_API_KEY:-}" ] && echo "GEMINI_API_KEY=${GEMINI_API_KEY}" >> .env || echo "GEMINI_API_KEY secret not set; audio Gemini will use in-app key only"
           grep -rhoE 'BuildConfig\.[A-Za-z0-9_]+' app/src --include='*.kt' --include='*.java' 2>/dev/null \
             | sed 's/.*BuildConfig\.//' | grep -vE '^(DEBUG|APPLICATION_ID|BUILD_TYPE|FLAVOR|VERSION_CODE|VERSION_NAME)$' | sort -u > /tmp/keys.txt
           grep -rhoE '\$\{[A-Za-z0-9_]+\}' app/src --include='*.xml' 2>/dev/null \
