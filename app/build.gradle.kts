@@ -1,5 +1,6 @@
 import com.google.gms.googleservices.GoogleServicesPlugin.MissingGoogleServicesStrategy
 import java.time.Duration
+import java.util.zip.ZipFile
 
 
 plugins {
@@ -94,7 +95,7 @@ val copyGdxAndroidNatives = tasks.register("copyGdxAndroidNatives") {
 
       // Android expects native libraries directly under jniLibs/<abi>/.
       // Flatten the JAR paths to avoid accidentally packaging lib/<abi> twice.
-      java.util.zip.ZipFile(archive).use { zip ->
+      ZipFile(archive).use { zip ->
         val entries = zip.entries()
         while (entries.hasMoreElements()) {
           val entry = entries.nextElement()
@@ -110,7 +111,7 @@ val copyGdxAndroidNatives = tasks.register("copyGdxAndroidNatives") {
   }
 }
 
-android.sourceSets.getByName("main").jniLibs.srcDir(layout.buildDirectory.dir("generated/gdxJniLibs"))
+android.sourceSets.getByName("main").jniLibs.srcDir(layout.buildDirectory.dir("generated/gdxJniLibs").get().asFile)
 tasks.named("preBuild").configure { dependsOn(copyGdxAndroidNatives) }
 
 // Some unused dependencies are commented out below instead of being removed.
